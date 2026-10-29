@@ -91,6 +91,48 @@ class VectorStore:
         """Return the number of stored chunks."""
         return self._collection.count()
 
+    def query(
+        self,
+        embedding: Sequence[float],
+        n_results: int,
+    ) -> list[dict[str, Any]]:
+        """Return the closest stored chunks for a query embedding."""
+        if not embedding:
+            raise ValueError("Query embedding must not be empty.")
+
+        if n_results < 1:
+            raise ValueError("Number of results must be at least one.")
+
+        if self.count() == 0:
+            return []
+
+        result = self._collection.query(
+            query_embeddings=[[float(value) for value in embedding]],
+            n_results=min(n_results, self.count()),
+            include=["documents", "metadatas", "distances"],
+        )
+
+        ids = result["ids"][0]
+        documents = result["documents"][0]
+        metadatas = result["metadatas"][0]
+        distances = result["distances"][0]
+
+        return [
+            {
+                "id": chunk_id,
+                "text": document,
+                "metadata": metadata,
+                "distance": distance,
+            }
+            for chunk_id, document, metadata, distance in zip(
+                ids,
+                documents,
+                metadatas,
+                distances,
+                strict=True,
+            )
+        ]
+
     def clear(self) -> None:
         """Delete and recreate the collection to remove stale chunks."""
         self._client.delete_collection(name=self.collection_name)

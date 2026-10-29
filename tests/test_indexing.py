@@ -121,6 +121,52 @@ def test_vector_store_rejects_mismatched_chunk_and_embedding_counts() -> None:
         store.add_chunks(make_chunks(), [[0.1, 0.2]])
 
 
+def test_vector_store_query_returns_similar_chunks_with_metadata() -> None:
+    chunks = make_chunks()
+    store = VectorStore()
+    store.add_chunks(
+        chunks,
+        [[1.0, 0.0], [0.0, 1.0]],
+    )
+
+    results = store.query([1.0, 0.0], n_results=20)
+
+    assert len(results) == 2
+    assert results[0]["id"] == "doc-1:0"
+    assert results[0]["text"] == "First paragraph."
+    assert results[0]["metadata"]["document_id"] == "doc-1"
+    assert results[0]["metadata"]["source_name"] == "sample.pdf"
+    assert results[0]["metadata"]["chunk_index"] == 0
+    assert results[0]["metadata"]["page_numbers"] == "1"
+    assert results[0]["distance"] == pytest.approx(0.0)
+    assert results[0]["distance"] <= results[1]["distance"]
+
+
+def test_vector_store_query_returns_empty_list_for_empty_store() -> None:
+    store = VectorStore()
+
+    assert store.query([1.0, 0.0], n_results=20) == []
+
+
+@pytest.mark.parametrize(
+    ("embedding", "n_results", "message"),
+    [
+        ([], 1, "Query embedding must not be empty."),
+        ([1.0, 0.0], 0, "Number of results must be at least one."),
+        ([1.0, 0.0], -1, "Number of results must be at least one."),
+    ],
+)
+def test_vector_store_query_rejects_invalid_inputs(
+    embedding: list[float],
+    n_results: int,
+    message: str,
+) -> None:
+    store = VectorStore()
+
+    with pytest.raises(ValueError, match=message):
+        store.query(embedding, n_results)
+
+
 def test_indexing_reuses_unchanged_document_without_reembedding() -> None:
     state: dict[str, object] = {}
     model = FakeEmbeddingModel()
