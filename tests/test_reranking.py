@@ -1,6 +1,8 @@
 """Tests for FlashRank passage reranking."""
 
 from collections.abc import Sequence
+import sys
+from types import ModuleType
 from typing import Any
 
 import pytest
@@ -150,3 +152,51 @@ def test_count_tokens_rejects_non_string_input() -> None:
 
     with pytest.raises(ValueError, match="must be a string"):
         reranker.count_tokens(123)
+
+
+def test_reranker_wraps_model_initialization_failure(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def failing_ranker(**kwargs: Any) -> Any:
+        raise OSError("Model initialization failed.")
+
+    flashrank_module = ModuleType("flashrank")
+    flashrank_module.Ranker = failing_ranker
+    monkeypatch.setitem(sys.modules, "flashrank", flashrank_module)
+
+    reranker = PassageReranker()
+
+    with pytest.raises(
+        RuntimeError,
+        match="Failed to initialize the FlashRank reranking model",
+    ) as exc_info:
+        reranker._get_ranker()
+
+    assert isinstance(exc_info.value.__cause__, OSError)
+
+
+def test_reranker_wraps_ranking_execution_failure(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class FakeRerankRequest:
+        def __init__(self, query: str, passages: list[dict[str, Any]]) -> None:
+            self.query = query
+            self.passages = passages
+
+    class FailingRanker:
+        def rerank(self, request: Any) -> Any:
+            raise OSError("Ranking execution failed.")
+
+    flashrank_module = ModuleType("flashrank")
+    flashrank_module.RerankRequest = FakeRerankRequest
+    monkeypatch.setitem(sys.modules, "flashrank", flashrank_module)
+
+    reranker = PassageReranker(ranker=FailingRanker())
+
+    with pytest.raises(
+        RuntimeError,
+        match="Failed to rerank document passages",
+    ) as exc_info:
+        reranker.rerank("question", make_candidates())
+
+    assert isinstance(exc_info.value.__cause__, OSError)

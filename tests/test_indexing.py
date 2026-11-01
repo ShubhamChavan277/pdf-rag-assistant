@@ -236,3 +236,24 @@ def test_indexing_rebuilds_when_active_store_is_incomplete() -> None:
     assert second is not first
     assert second.store.count() == len(chunks)
     assert len(model.calls) == 2
+
+
+def test_indexing_removes_active_index_when_rebuild_embedding_fails() -> None:
+    state: dict[str, object] = {}
+    first = index_document(make_chunks(), state, FakeEmbeddingModel())
+
+    replacement_chunks = make_chunks(
+        document_id="doc-2",
+        source_name="replacement.pdf",
+        texts=("Replacement content.",),
+    )
+
+    class FailingEmbeddingModel:
+        def embed_texts(self, texts: Sequence[str]) -> list[list[float]]:
+            raise RuntimeError("Embedding failed.")
+
+    with pytest.raises(RuntimeError, match="Embedding failed"):
+        index_document(replacement_chunks, state, FailingEmbeddingModel())
+
+    assert SESSION_INDEX_KEY not in state
+    assert first.store.count() == 0
