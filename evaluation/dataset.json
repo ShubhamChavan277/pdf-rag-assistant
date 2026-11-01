@@ -1,0 +1,172 @@
+
+{
+  "dataset_name": "PDF RAG Assistant Evaluation",
+  "version": "1.0",
+  "description": "Twenty-question benchmark covering two local PDFs, including answerable and unanswerable questions.",
+  "documents": [
+    "IRCTC - Cancellation Rules for Train.pdf",
+    "Traffic Rules and Regulations in India.pdf"
+  ],
+  "questions": [
+    {
+      "id": "I01",
+      "question": "What are the flat cancellation charges for confirmed Executive Class and AC Chair Car tickets cancelled more than 48 hours before departure?",
+      "answerable": true,
+      "expected_answer": "₹240 plus GST per passenger for Executive Class and ₹180 plus GST per passenger for AC Chair Car.",
+      "source_document": "IRCTC - Cancellation Rules for Train.pdf",
+      "relevant_pages": [1]
+    },
+    {
+      "id": "I02",
+      "question": "What cancellation charge applies to confirmed tickets cancelled between 48 and 12 hours before departure?",
+      "answerable": true,
+      "expected_answer": "25% of the fare, subject to the applicable minimum cancellation charge, plus GST.",
+      "source_document": "IRCTC - Cancellation Rules for Train.pdf",
+      "relevant_pages": [1]
+    },
+    {
+      "id": "I03",
+      "question": "What cancellation charge applies when a confirmed ticket is cancelled between 12 and 4 hours before departure?",
+      "answerable": true,
+      "expected_answer": "50% of the fare, subject to the applicable minimum cancellation charge, plus GST.",
+      "source_document": "IRCTC - Cancellation Rules for Train.pdf",
+      "relevant_pages": [1]
+    },
+    {
+      "id": "I04",
+      "question": "What happens when all passengers on a waitlisted ticket remain waitlisted after first charting?",
+      "answerable": true,
+      "expected_answer": "The ticket is automatically cancelled and the full refund is credited without cancellation deduction.",
+      "source_document": "IRCTC - Cancellation Rules for Train.pdf",
+      "relevant_pages": [1]
+    },
+    {
+      "id": "I05",
+      "question": "What is the cancellation charge for an online cancellation of a waitlisted ticket?",
+      "answerable": true,
+      "expected_answer": "₹20 plus GST per passenger, provided cancellation occurs up to four hours before scheduled departure.",
+      "source_document": "IRCTC - Cancellation Rules for Train.pdf",
+      "relevant_pages": [1]
+    },
+    {
+      "id": "I06",
+      "question": "What is the refund condition for partially confirmed party or family e-tickets cancelled after first charting?",
+      "answerable": true,
+      "expected_answer": "Full refund for confirmed passengers without cancellation deduction, subject to online cancellation or TDR filing for all passengers after first charting and up to 30 minutes before departure.",
+      "source_document": "IRCTC - Cancellation Rules for Train.pdf",
+      "relevant_pages": [2]
+    },
+    {
+      "id": "I07",
+      "question": "What is the TDR filing deadline when a train is running more than three hours late and the passenger does not travel?",
+      "answerable": true,
+      "expected_answer": "Before the actual departure time at the boarding station.",
+      "source_document": "IRCTC - Cancellation Rules for Train.pdf",
+      "relevant_pages": [3]
+    },
+    {
+      "id": "I08",
+      "question": "What is the TDR filing deadline for a train terminated short of its destination?",
+      "answerable": true,
+      "expected_answer": "Up to 72 hours after the scheduled arrival at the passenger's destination.",
+      "source_document": "IRCTC - Cancellation Rules for Train.pdf",
+      "relevant_pages": [4]
+    },
+    {
+      "id": "T01",
+      "question": "Which side of a two-way road must vehicles use in India?",
+      "answerable": true,
+      "expected_answer": "Vehicles must travel on the left side of the road.",
+      "source_document": "Traffic Rules and Regulations in India.pdf",
+      "relevant_pages": [1]
+    },
+    {
+      "id": "T02",
+      "question": "From which side should a vehicle overtake, and where is overtaking prohibited?",
+      "answerable": true,
+      "expected_answer": "Overtaking should be from the right. It is prohibited on curves, bridges, narrow stretches, and near pedestrian crossings.",
+      "source_document": "Traffic Rules and Regulations in India.pdf",
+      "relevant_pages": [1]
+    },
+    {
+      "id": "T03",
+      "question": "What should motorists do when an emergency vehicle approaches?",
+      "answerable": true,
+      "expected_answer": "Yield the right of way and move to the side of the road to allow unobstructed passage.",
+      "source_document": "Traffic Rules and Regulations in India.pdf",
+      "relevant_pages": [1]
+    },
+    {
+      "id": "T04",
+      "question": "What are the horn restrictions in designated Silence Zones?",
+      "answerable": true,
+      "expected_answer": "Horn use is prohibited in designated Silence Zones. Loud, multi-toned, and musical air horns are also banned.",
+      "source_document": "Traffic Rules and Regulations in India.pdf",
+      "relevant_pages": [1]
+    },
+    {
+      "id": "T05",
+      "question": "What are the minimum light-transmission requirements stated for car windows?",
+      "answerable": true,
+      "expected_answer": "At least 70% for the windscreen and rear window, and at least 50% for side windows.",
+      "source_document": "Traffic Rules and Regulations in India.pdf",
+      "relevant_pages": [2]
+    },
+    {
+      "id": "T06",
+      "question": "Who must wear helmets on a two-wheeler according to the document?",
+      "answerable": true,
+      "expected_answer": "Both the rider and pillion rider must wear BIS/ISI-compliant protective helmets with the straps securely fastened.",
+      "source_document": "Traffic Rules and Regulations in India.pdf",
+      "relevant_pages": [2]
+    },
+    {
+      "id": "T07",
+      "question": "Which documents must a driver present when requested by an authorized official?",
+      "answerable": true,
+      "expected_answer": "Driving License, Registration Certificate, Certificate of Insurance, and Pollution Under Control certificate.",
+      "source_document": "Traffic Rules and Regulations in India.pdf",
+      "relevant_pages": [2]
+    },
+    {
+      "id": "T08",
+      "question": "What BAC level is identified as an offense for drunk driving, and what is the stated maximum imprisonment for a first offense?",
+      "answerable": true,
+      "expected_answer": "Blood alcohol concentration exceeding 30 mg per 100 ml of blood, with imprisonment of up to six months for a first offense.",
+      "source_document": "Traffic Rules and Regulations in India.pdf",
+      "relevant_pages": [3]
+    },
+    {
+      "id": "U01",
+      "question": "What is the current IRCTC cancellation refund policy as of today, including any amendments made after these documents were published?",
+      "answerable": false,
+      "expected_answer": null,
+      "source_document": null,
+      "relevant_pages": []
+    },
+    {
+      "id": "U02",
+      "question": "What is the exact fine in rupees for drunk driving for a first offense?",
+      "answerable": false,
+      "expected_answer": null,
+      "source_document": null,
+      "relevant_pages": []
+    },
+    {
+      "id": "U03",
+      "question": "What is the maximum speed limit for cars on the Mumbai-Pune Expressway?",
+      "answerable": false,
+      "expected_answer": null,
+      "source_document": null,
+      "relevant_pages": []
+    },
+    {
+      "id": "U04",
+      "question": "What is the IRCTC refund status of my personal train ticket booking?",
+      "answerable": false,
+      "expected_answer": null,
+      "source_document": null,
+      "relevant_pages": []
+    }
+  ]
+}

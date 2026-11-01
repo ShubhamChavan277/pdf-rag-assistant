@@ -33,3 +33,6 @@ uploads/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Local evaluation source PDFs
+evaluation/documents/
