@@ -1,38 +1,55 @@
 # PDF RAG Assistant
 
-A Streamlit-based PDF question-answering assistant that uses retrieval-augmented generation (RAG) to answer questions from uploaded documents with relevant source citations.
+A PDF question-answering application built with Streamlit and Retrieval-Augmented Generation (RAG). Upload a PDF, ask questions, and get answers supported by relevant passages and page references.
+
+**[Live Demo](https://ai-pdf-rag-assistant.streamlit.app/)**
+
+*Note: The app may sleep after inactivity on Streamlit Community Cloud. If prompted, click the wake-up button.*
 
 ## Features
 
-- Extracts text from PDF documents.
-- Splits documents into searchable chunks.
-- Uses local embeddings and ChromaDB for document retrieval.
-- Reranks retrieved passages to improve relevance.
-- Generates answers using Groq's hosted language model.
-- Uses document evidence and source page numbers to support answers.
-- Abstains when the available evidence is insufficient.
+- Upload and process PDF documents.
+- Choose between pypdf and pdfplumber for text extraction.
+- Retrieve relevant passages using semantic search.
+- Rerank results before sending selected evidence to the language model.
+- Generate answers with source and page references.
+- Abstain when the documents do not contain sufficient evidence.
 
-## Setup
+## How It Works
 
-1. Clone the repository and open the project directory.
-2. Create and activate a Python virtual environment.
-3. Install dependencies:
+```mermaid
+flowchart TD
+    A[Upload PDF] --> B[Validate and extract text]
+    B --> C[Split text into chunks]
+    C --> D[Generate local embeddings]
+    D --> E[Store in in-memory ChromaDB]
+    F[Ask a question] --> G[Retrieve top 20 passages]
+    E --> G
+    G --> H[FlashRank reranking]
+    H --> I[Select up to 5 evidence passages]
+    I --> J[Generate answer using Groq]
+    J --> K[Answer with sources or abstain]
+```
 
-   ```bash
-   pip install -r requirements.txt
-   ```
+## Run Locally
 
-4. Copy `.env.example` to `.env`.
-5. Add your Groq API key to `.env`.
-6. Run the application:
+Python 3.13 or later is required.
 
-   ```bash
-   streamlit run app.py
-   ```
+```powershell
+py -3.13 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+Copy-Item .env.example .env
+```
 
-## Configuration
+Add your Groq API key to `.env`, then start the application:
 
-The application reads its Groq settings from environment variables.
+```powershell
+streamlit run app.py
+```
+
+### Configuration
 
 | Variable | Default |
 |---|---|
@@ -43,22 +60,47 @@ The application reads its Groq settings from environment variables.
 | `GROQ_TEMPERATURE` | `0` |
 | `GROQ_MAX_OUTPUT_TOKENS` | `512` |
 
-Never commit your `.env` file or expose your API key.
+Never commit your `.env` file or API key. For Streamlit Community Cloud, add the key through the app's Secrets settings.
 
-## Deployment
+## Testing
 
-The application can be deployed using Streamlit Community Cloud.
+Run the automated test suite:
 
-Add the required Groq configuration under the app's **Settings → Secrets** section. Use the same variable names as the local environment configuration.
+```powershell
+python -m pytest -q
+```
 
-Do not commit API keys or deployment secrets to GitHub.
+**204 tests passed** during the M11 verification run.
 
-## Cost and limitations
+## Evaluation
 
-The project is designed to use local document processing and the Groq Free Plan for language model inference.
+See [evaluation/report.md](evaluation/report.md) for the evaluation method, results, and limitations.
 
-- Keep the Groq account on its Free Plan and do not enable paid usage.
-- Free-tier limits are shared and may restrict requests.
-- No automatic paid-provider fallback is configured.
-- Streamlit Community Cloud resources are limited, and local document indexes may need to be rebuilt after a restart.
-- Token counts are estimates, not exact provider tokenizer counts.
+The evaluation used 20 questions across two PDFs. For the 16 answerable questions, retrieval achieved:
+
+| Metric | Baseline | After Reranking |
+|---|---:|---:|
+| Hit@5 | 1.00 | 1.00 |
+| Recall@5 | 1.00 | 1.00 |
+| Precision@5 | 0.525 | 0.5125 |
+| MRR | 0.95 | 1.00 |
+
+Reranking improved MRR in this evaluation, while precision decreased slightly. These results come from a small dataset and are not a general performance guarantee.
+
+To reproduce the evaluation, place the required source PDFs in `evaluation/documents/` and run:
+
+```powershell
+python evaluation/run_evaluation.py
+```
+
+The optional `--generate` flag also runs a small Groq-based answer evaluation and uses API quota.
+
+## Design Choices and Limitations
+
+- **PDF parsing:** pypdf is the default because it was faster in our small comparison. pdfplumber is also available.
+- **Retrieval:** Uses local Sentence Transformers embeddings, in-memory ChromaDB, and FlashRank reranking.
+- **Answer generation:** Uses Groq-hosted `openai/gpt-oss-20b`. Answers rely on selected document evidence and abstain when evidence is insufficient.
+- **Privacy:** Selected document passages are sent to Groq for answer generation. Avoid uploading confidential documents.
+- **Storage:** The vector index is held in memory and must be rebuilt when the application restarts.
+- **PDF support:** Text extraction only; scanned PDFs requiring OCR are not supported.
+- **Hosting:** Streamlit Community Cloud and Groq Free Tier have resource and usage limits. The app may sleep after inactivity. No automatic paid fallback is configured.
